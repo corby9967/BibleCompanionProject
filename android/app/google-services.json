@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "254174956352",
+    "project_id": "partners-in-faith",
+    "storage_bucket": "partners-in-faith.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:254174956352:android:a7c6d87c5e0c6d0a3148a5",
+        "android_client_info": {
+          "package_name": "com.example.project"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "254174956352-88jpvej6unlvu52o0dbj42egmk7ockbd.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCXS16IrBOfDqlV8CzlO_POkZMccgjVbJk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "254174956352-88jpvej6unlvu52o0dbj42egmk7ockbd.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "254174956352-p8nmpp796jj65d7b1lb07rc9938bff4a.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.project"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
