@@ -121,9 +121,11 @@ class _MakeGroupPageState extends State<MakeGroupPage> {
             ),
             onPressed: () async {
               if (isButtonActive) {
+                groupCode = await generateHouseCode();
+
                 FirebaseFirestore.instance
                     .collection('groups')
-                    .doc(controller.text)
+                    .doc(groupCode)
                     .collection('users')
                     .doc(FirebaseAuth.instance.currentUser!.uid)
                     .set({
@@ -132,7 +134,6 @@ class _MakeGroupPageState extends State<MakeGroupPage> {
                   'profileImage': FirebaseAuth.instance.currentUser!.photoURL
                 });
 
-                groupCode = await generateHouseCode();
                 Get.to(() => HomePage(groupCode: groupCode));
               }
             },

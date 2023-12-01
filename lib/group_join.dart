@@ -33,15 +33,13 @@ class _JoinGroupPageState extends State<JoinGroupPage> {
 
     myDocument.get().then((DocumentSnapshot documentSnapshot) {
       if (documentSnapshot.exists) {
-        FirebaseFirestore.instance
-            .collection('groups')
-            .doc(controller.text)
+        myDocument
             .collection('users')
             .doc(FirebaseAuth.instance.currentUser!.uid)
             .set({
           'name': FirebaseAuth.instance.currentUser!.displayName,
           'uid': FirebaseAuth.instance.currentUser!.uid,
-          'profileImage': FirebaseAuth.instance.currentUser!.photoURL
+          'profileImage': FirebaseAuth.instance.currentUser!.photoURL,
         });
 
         Get.to(() => HomePage(groupCode: controller.text));

@@ -53,6 +53,59 @@ class _DetailPageState extends State<DetailPage> {
     });
   }
 
+  void myDialog(String docId1, String docId2, String type) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(10.0)),
+            title: Column(
+              children: <Widget>[
+                Text(
+                  '$type을 삭제하시겠습니까?',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ],
+            ),
+            contentPadding: const EdgeInsets.all(0),
+            actionsPadding:
+                const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+            actionsAlignment: MainAxisAlignment.end,
+            actions: <Widget>[
+              TextButton(
+                child: const Text('취소'),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+              ),
+              FilledButton(
+                child: const Text('삭제'),
+                onPressed: () {
+                  type == '글'
+                      ? FirebaseFirestore.instance
+                          .collection('groups')
+                          .doc(widget.groupCode)
+                          .collection('posts')
+                          .doc(docId1)
+                          .delete()
+                      : FirebaseFirestore.instance
+                          .collection('groups')
+                          .doc(widget.groupCode)
+                          .collection('posts')
+                          .doc(docId1)
+                          .collection('comments')
+                          .doc(docId2)
+                          .delete();
+
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          );
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -81,8 +134,10 @@ class _DetailPageState extends State<DetailPage> {
 
                 List<DocumentSnapshot> commentDocuments = commentsSnapshot.docs;
 
-                return Expanded(
+                return SizedBox(
+                  height: MediaQuery.of(context).size.height - 220,
                   child: ListView.builder(
+                    shrinkWrap: true,
                     itemCount: commentDocuments.length + 1,
                     itemBuilder: (context, index) {
                       if (index == 0) {
@@ -111,7 +166,12 @@ class _DetailPageState extends State<DetailPage> {
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
                                             children: [
-                                              Text(widget.name),
+                                              Text(
+                                                widget.name,
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
                                               Text(
                                                 widget.date,
                                                 style: const TextStyle(
@@ -132,12 +192,11 @@ class _DetailPageState extends State<DetailPage> {
                                                     content: widget.content,
                                                   ),
                                                 )
-                                              : FirebaseFirestore.instance
-                                                  .collection('groups')
-                                                  .doc(widget.groupCode)
-                                                  .collection('posts')
-                                                  .doc(widget.docId)
-                                                  .delete();
+                                              : myDialog(
+                                                  widget.docId,
+                                                  commentDocuments[index - 1]
+                                                      .id,
+                                                  '글');
                                         },
                                         itemBuilder:
                                             (BuildContext buildContext) {
@@ -169,9 +228,12 @@ class _DetailPageState extends State<DetailPage> {
                             ),
                             Container(
                               width: MediaQuery.of(context).size.width,
-                              height: 100,
+                              height: 110,
                               decoration: BoxDecoration(
-                                  color: Colors.black12.withOpacity(0.05)),
+                                  color: Colors.black12.withOpacity(0.05),
+                                  borderRadius: const BorderRadius.only(
+                                      topLeft: Radius.circular(18),
+                                      topRight: Radius.circular(18))),
                               child: Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 15, vertical: 15),
@@ -277,7 +339,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       color: Colors.black26,
                                                       shape: BoxShape.circle,
                                                       border: Border.all(
-                                                        width: 3,
+                                                        width: 2,
                                                         color: Colors.purple
                                                             .withOpacity(0.8),
                                                       ),
@@ -291,7 +353,7 @@ class _DetailPageState extends State<DetailPage> {
                                                       ),
                                                     ),
                                                   ),
-                                                  const SizedBox(width: 5),
+                                                  const SizedBox(width: 8),
                                                 ],
                                               );
                                             },
@@ -364,6 +426,23 @@ class _DetailPageState extends State<DetailPage> {
                                         ),
                                       ],
                                     ),
+                                    const Spacer(),
+                                    Visibility(
+                                      visible: commentDocuments[index - 1]
+                                              .get('uid') ==
+                                          FirebaseAuth
+                                              .instance.currentUser!.uid,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.delete_outline),
+                                        iconSize: 20,
+                                        onPressed: () async {
+                                          myDialog(
+                                              widget.docId,
+                                              commentDocuments[index - 1].id,
+                                              '댓글');
+                                        },
+                                      ),
+                                    )
                                   ],
                                 ),
                               ),
@@ -430,6 +509,7 @@ class _DetailPageState extends State<DetailPage> {
                             .collection('comments')
                             .doc()
                             .set({
+                          'uid': FirebaseAuth.instance.currentUser!.uid,
                           'name':
                               FirebaseAuth.instance.currentUser!.displayName,
                           'profileImage':

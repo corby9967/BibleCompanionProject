@@ -66,8 +66,9 @@ class DefaultFirebaseOptions {
     messagingSenderId: '254174956352',
     projectId: 'partners-in-faith',
     storageBucket: 'partners-in-faith.appspot.com',
-    iosClientId: '254174956352-p8nmpp796jj65d7b1lb07rc9938bff4a.apps.googleusercontent.com',
-    iosBundleId: 'com.example.project',
+    iosClientId:
+        '254174956352-p8nmpp796jj65d7b1lb07rc9938bff4a.apps.googleusercontent.com',
+    iosBundleId: 'com.hoyeon.project',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -76,7 +77,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '254174956352',
     projectId: 'partners-in-faith',
     storageBucket: 'partners-in-faith.appspot.com',
-    iosClientId: '254174956352-r15gdcoe3u4tocn591medko1fo2t8atf.apps.googleusercontent.com',
-    iosBundleId: 'com.example.project.RunnerTests',
+    iosClientId:
+        '254174956352-r15gdcoe3u4tocn591medko1fo2t8atf.apps.googleusercontent.com',
+    iosBundleId: 'com.hoyeon.project.RunnerTests',
   );
 }
