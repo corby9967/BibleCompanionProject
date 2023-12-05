@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/route_manager.dart';
+import 'package:percent_indicator/percent_indicator.dart';
 import 'package:project/detail.dart';
 import 'package:project/edit.dart';
 import 'package:project/group.dart';
+import 'package:project/map.dart';
 import 'package:project/notifi_service.dart';
 import 'package:project/post.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -117,6 +119,7 @@ class _HomePageState extends State<HomePage> {
             groupName,
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
+          scrolledUnderElevation: 0,
           centerTitle: true,
           elevation: 0,
           actions: [
@@ -197,6 +200,15 @@ class _HomePageState extends State<HomePage> {
                 },
               ),
               ListTile(
+                leading: const Icon(Icons.map_outlined),
+                title: const Text('지도'),
+                onTap: () {
+                  Get.to(() => MapPage(
+                        groupCode: widget.groupCode,
+                      ));
+                },
+              ),
+              ListTile(
                 leading: const Icon(Icons.redo_outlined),
                 title: const Text('방 나가기'),
                 onTap: () {
@@ -208,6 +220,7 @@ class _HomePageState extends State<HomePage> {
                 title: const Text('로그아웃'),
                 onTap: () {
                   FirebaseAuth.instance.signOut();
+                  Navigator.popUntil(context, ModalRoute.withName("/"));
                 },
               ),
             ],
@@ -230,14 +243,14 @@ class _HomePageState extends State<HomePage> {
                       builder: (BuildContext context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
-                          return const CircularProgressIndicator();
+                          return Container();
                         }
                         if (snapshot.hasError) {
                           return Text('Error: ${snapshot.error}');
                         }
 
                         if (!snapshot.hasData) {
-                          return const CircularProgressIndicator();
+                          return Container();
                         }
 
                         final List<dynamic> profileImage = snapshot.data!.docs
@@ -254,6 +267,10 @@ class _HomePageState extends State<HomePage> {
 
                         final List<dynamic> likes = snapshot.data!.docs
                             .map((doc) => doc['likes'])
+                            .toList();
+
+                        final List<dynamic> uid = snapshot.data!.docs
+                            .map((doc) => doc['uid'])
                             .toList();
 
                         return ListView.builder(
@@ -396,7 +413,8 @@ class _HomePageState extends State<HomePage> {
                                                   Text(
                                                     '${name[index - 1]}의 기도제목',
                                                     style: const TextStyle(
-                                                        fontSize: 22),
+                                                      fontSize: 22,
+                                                    ),
                                                   ),
                                                 ],
                                               ),
@@ -417,28 +435,83 @@ class _HomePageState extends State<HomePage> {
                                                 ),
                                               ),
                                               actions: [
-                                                Text('$like'),
-                                                IconButton.filled(
-                                                    onPressed: () {
-                                                      FirebaseFirestore.instance
-                                                          .collection('groups')
-                                                          .doc(widget.groupCode)
-                                                          .collection('prays')
-                                                          .doc(FirebaseAuth
-                                                              .instance
-                                                              .currentUser!
-                                                              .uid)
-                                                          .update({
-                                                        'likes': FieldValue
-                                                            .increment(1),
-                                                      });
-                                                      setState(() {
-                                                        like++;
-                                                      });
-                                                    },
-                                                    icon: const Icon(
-                                                        Icons.favorite,
-                                                        color: Colors.white))
+                                                Row(
+                                                  children: [
+                                                    Column(
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Container(
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              200,
+                                                          alignment: like <= 10
+                                                              ? FractionalOffset(
+                                                                  like / 10,
+                                                                  1 -
+                                                                      (like /
+                                                                          10))
+                                                              : const FractionalOffset(
+                                                                  1, 0),
+                                                          child:
+                                                              FractionallySizedBox(
+                                                            child:
+                                                                Text('$like'),
+                                                          ),
+                                                        ),
+                                                        const SizedBox(
+                                                            height: 3),
+                                                        LinearPercentIndicator(
+                                                          percent: like <= 10
+                                                              ? like / 10
+                                                              : 1,
+                                                          lineHeight: 10,
+                                                          animation: true,
+                                                          backgroundColor:
+                                                              Colors.black12,
+                                                          progressColor:
+                                                              Theme.of(context)
+                                                                  .colorScheme
+                                                                  .primary,
+                                                          barRadius:
+                                                              const Radius
+                                                                  .circular(4),
+                                                          width: MediaQuery.of(
+                                                                      context)
+                                                                  .size
+                                                                  .width -
+                                                              200,
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(width: 20),
+                                                    IconButton.filled(
+                                                      onPressed: () {
+                                                        FirebaseFirestore
+                                                            .instance
+                                                            .collection(
+                                                                'groups')
+                                                            .doc(widget
+                                                                .groupCode)
+                                                            .collection('prays')
+                                                            .doc(uid[index - 1])
+                                                            .update({
+                                                          'likes': FieldValue
+                                                              .increment(1),
+                                                        });
+                                                        setState(() {
+                                                          like++;
+                                                        });
+                                                      },
+                                                      icon: const Icon(
+                                                          Icons.favorite,
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
                                               ],
                                             ),
                                           );
@@ -589,24 +662,25 @@ class _HomePageState extends State<HomePage> {
                             GestureDetector(
                               onTap: () {
                                 Get.to(
-                                  () => DetailPage(
-                                    groupCode: widget.groupCode,
-                                    docId: documents[index].id,
-                                    name: documents[index].get('name'),
-                                    uid: documents[index].get('uid'),
-                                    date: newDate,
-                                    content: documents[index].get('content'),
-                                    profile:
-                                        documents[index].get('profileImage'),
-                                    autoFocus: false,
-                                  ),
-                                );
+                                    () => DetailPage(
+                                          groupCode: widget.groupCode,
+                                          docId: documents[index].id,
+                                          name: documents[index].get('name'),
+                                          uid: documents[index].get('uid'),
+                                          date: newDate,
+                                          content:
+                                              documents[index].get('content'),
+                                          profile: documents[index]
+                                              .get('profileImage'),
+                                          autoFocus: false,
+                                        ),
+                                    transition: Transition.cupertino);
                               },
                               child: SizedBox(
                                 width: MediaQuery.of(context).size.width,
                                 child: Text(
                                   documents[index].get('content'),
-                                  maxLines: 3,
+                                  maxLines: 4,
                                   overflow: TextOverflow.ellipsis,
                                 ),
                               ),
@@ -632,88 +706,102 @@ class _HomePageState extends State<HomePage> {
                                 SizedBox(
                                   width: MediaQuery.of(context).size.width / 2 -
                                       20,
-                                  child: TextButton(
-                                    onPressed: () async {
-                                      final likedPostsRef = FirebaseFirestore
-                                          .instance
+                                  child: StreamBuilder<QuerySnapshot>(
+                                      stream: FirebaseFirestore.instance
                                           .collection('groups')
                                           .doc(widget.groupCode)
                                           .collection('posts')
                                           .doc(documents[index].id)
                                           .collection('liked')
-                                          .doc(FirebaseAuth
-                                              .instance.currentUser!.uid);
+                                          .snapshots(),
+                                      builder: (context, snapshot) {
+                                        if (!snapshot.hasData) {
+                                          return const Center(
+                                              child:
+                                                  CircularProgressIndicator());
+                                        }
 
-                                      final likedPostsDoc =
-                                          await likedPostsRef.get();
+                                        int length = snapshot.data!.docs.length;
 
-                                      if (likedPostsDoc.exists) {
-                                        ScaffoldMessenger.of(context)
-                                            .showSnackBar(const SnackBar(
-                                          content: Text('이미 공감했습니다!'),
-                                          duration: Duration(seconds: 1),
-                                        ));
-                                      } else {
-                                        FirebaseFirestore.instance
-                                            .collection('groups')
-                                            .doc(widget.groupCode)
-                                            .collection('posts')
-                                            .doc(documents[index].id)
-                                            .collection('liked')
-                                            .doc(FirebaseAuth
-                                                .instance.currentUser!.uid)
-                                            .set({
-                                          'liked': true,
-                                          'timestamp': DateTime.now()
-                                              .millisecondsSinceEpoch,
-                                          'profileImage': FirebaseAuth
-                                              .instance.currentUser!.photoURL
-                                        });
-                                        FirebaseFirestore.instance
-                                            .collection('groups')
-                                            .doc(widget.groupCode)
-                                            .collection('posts')
-                                            .doc(documents[index].id)
-                                            .update({
-                                          'likes': FieldValue.increment(1),
-                                        });
-                                      }
+                                        return TextButton(
+                                          onPressed: () async {
+                                            final likedPostsRef =
+                                                FirebaseFirestore.instance
+                                                    .collection('groups')
+                                                    .doc(widget.groupCode)
+                                                    .collection('posts')
+                                                    .doc(documents[index].id)
+                                                    .collection('liked')
+                                                    .doc(FirebaseAuth.instance
+                                                        .currentUser!.uid);
 
-                                      setState(() {
-                                        isLikedList[index] = true;
-                                      });
-                                    },
-                                    style: ButtonStyle(
-                                        backgroundColor:
-                                            MaterialStatePropertyAll(
-                                                isLikedList[index]
-                                                    ? Theme.of(context)
-                                                        .colorScheme
-                                                        .primary
-                                                    : Theme.of(context)
-                                                        .colorScheme
-                                                        .primary
-                                                        .withOpacity(0))),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Icon(
-                                          Icons.face_5_outlined,
-                                          color: isLikedList[index]
-                                              ? Colors.white
-                                              : Colors.black,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Text('공감',
-                                            style: TextStyle(
-                                                color: isLikedList[index]
+                                            final likedPostsDoc =
+                                                await likedPostsRef.get();
+
+                                            if (likedPostsDoc.exists) {
+                                              ScaffoldMessenger.of(context)
+                                                  .showSnackBar(const SnackBar(
+                                                content: Text('이미 공감했습니다!'),
+                                                duration: Duration(seconds: 1),
+                                              ));
+                                            } else {
+                                              likedPostsRef.set({
+                                                'liked': true,
+                                                'timestamp': DateTime.now()
+                                                    .millisecondsSinceEpoch,
+                                                'profileImage': FirebaseAuth
+                                                    .instance
+                                                    .currentUser!
+                                                    .photoURL
+                                              });
+                                              FirebaseFirestore.instance
+                                                  .collection('groups')
+                                                  .doc(widget.groupCode)
+                                                  .collection('posts')
+                                                  .doc(documents[index].id)
+                                                  .update({
+                                                'likes':
+                                                    FieldValue.increment(1),
+                                              });
+                                            }
+
+                                            setState(() {
+                                              isLikedList[index] = true;
+                                            });
+                                          },
+                                          style: ButtonStyle(
+                                              backgroundColor:
+                                                  MaterialStatePropertyAll(
+                                                      length >
+                                                              0
+                                                          ? Theme.of(context)
+                                                              .colorScheme
+                                                              .primary
+                                                          : Theme.of(context)
+                                                              .colorScheme
+                                                              .primary
+                                                              .withOpacity(0))),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              Icon(
+                                                Icons.face_5_outlined,
+                                                color: length > 0
                                                     ? Colors.white
-                                                    : Colors.black)),
-                                      ],
-                                    ),
-                                  ),
+                                                    : Colors.black,
+                                                size: 20,
+                                              ),
+                                              const SizedBox(width: 10),
+                                              Text('공감',
+                                                  style: TextStyle(
+                                                      color: length > 0
+                                                          ? Colors.white
+                                                          : Colors.black)),
+                                            ],
+                                          ),
+                                        );
+                                      }),
                                 ),
                                 SizedBox(
                                   width: MediaQuery.of(context).size.width / 2 -

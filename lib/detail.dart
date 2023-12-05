@@ -111,6 +111,7 @@ class _DetailPageState extends State<DetailPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(groupName),
+        scrolledUnderElevation: 0,
       ),
       body: Column(
         children: [

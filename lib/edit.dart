@@ -50,7 +50,7 @@ class _EditPageState extends State<EditPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Edit'),
+        title: const Text('글 수정하기'),
         actions: [
           TextButton(
             onPressed: () {
@@ -60,7 +60,7 @@ class _EditPageState extends State<EditPage> {
               }
             },
             child: Text(
-              'Done',
+              '완료',
               style: TextStyle(
                   color: isButtonActive ? Colors.black : Colors.black26),
             ),

@@ -108,7 +108,7 @@ class _JoinGroupPageState extends State<JoinGroupPage> {
             onPressed: () {
               isButtonActive ? codeVerification() : null;
             },
-            child: const Text('Enter'),
+            child: const Text('들어가기'),
           )
         ],
       ),

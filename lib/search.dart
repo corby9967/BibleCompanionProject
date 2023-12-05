@@ -32,6 +32,7 @@ class _SearchPageState extends State<SearchPage> {
           widget.groupName,
           style: const TextStyle(fontWeight: FontWeight.bold),
         ),
+        scrolledUnderElevation: 0,
         centerTitle: true,
         elevation: 0,
       ),
@@ -54,12 +55,7 @@ class _SearchPageState extends State<SearchPage> {
                       hintStyle: TextStyle(
                         fontSize: 15,
                       ),
-                      contentPadding:
-                          EdgeInsets.only(top: 0, left: 10, right: 10),
-                      border: OutlineInputBorder(
-                        borderSide: BorderSide(color: Color(0xFFE8E8E8)),
-                        borderRadius: BorderRadius.all(Radius.circular(15)),
-                      ),
+                      contentPadding: EdgeInsets.only(left: 5, right: 5),
                     ),
                   ),
                 ),
@@ -67,6 +63,7 @@ class _SearchPageState extends State<SearchPage> {
                     onPressed: () {
                       setState(() {
                         searchText = controller.text;
+                        searchText = searchText.toLowerCase();
                       });
                     },
                     icon: const Icon(Icons.search))
@@ -123,6 +120,7 @@ class _SearchPageState extends State<SearchPage> {
                               ),
                               title: Text(
                                 content,
+                                maxLines: 1,
                                 style: const TextStyle(fontSize: 15),
                               ),
                               contentPadding:

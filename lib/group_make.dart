@@ -137,7 +137,7 @@ class _MakeGroupPageState extends State<MakeGroupPage> {
                 Get.to(() => HomePage(groupCode: groupCode));
               }
             },
-            child: const Text('Generate'),
+            child: const Text('만들기'),
           )
         ],
       ),

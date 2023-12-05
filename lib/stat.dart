@@ -62,9 +62,11 @@ class _StatPageState extends State<StatPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('통계'),
+        scrolledUnderElevation: 0,
         leading: IconButton(
           onPressed: () {
-            Get.to(() => HomePage(groupCode: widget.groupCode));
+            Get.to(() => HomePage(groupCode: widget.groupCode),
+                transition: Transition.leftToRight);
           },
           icon: const Icon(Icons.arrow_back_ios),
         ),
@@ -186,6 +188,37 @@ class _StatPageState extends State<StatPage> {
                                           .inversePrimary,
                                     );
                                   }),
+                            ],
+                          ),
+                          const SizedBox(height: 10),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const Text('기도제목'),
+                              const SizedBox(width: 4),
+                              Container(
+                                width: 13,
+                                height: 13,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              const Text('QT'),
+                              const SizedBox(width: 4),
+                              Container(
+                                width: 13,
+                                height: 13,
+                                decoration: BoxDecoration(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .inversePrimary,
+                                ),
+                              ),
                             ],
                           ),
                         ],
